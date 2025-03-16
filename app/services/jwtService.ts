@@ -6,21 +6,20 @@ const JWT_EXPIRATION = process.env.JWT_EXPIRATION ? parseInt(process.env.JWT_EXP
 export interface TokenPayload {
   userId: string;
   role: string;
-  extraInfo?: string;
 }
 
-// Generates a JWT token using the TokenPayload interface
+
 export function generateToken(payload: TokenPayload, expiresIn: number = JWT_EXPIRATION): string {
   const options: SignOptions = { expiresIn };
   return jwt.sign(payload, SECRET_KEY as jwt.Secret, options);
 }
 
-// Verifies the JWT token and returns the decoded payload conforming to TokenPayload
+
 export function verifyToken(token: string): TokenPayload | null {
   try {
     const decoded = jwt.verify(token, SECRET_KEY) as TokenPayload & JwtPayload;
     // Return only the TokenPayload properties
-    return { userId: decoded.userId, role: decoded.role, extraInfo: decoded.extraInfo };
+    return { userId: decoded.userId, role: decoded.role };
   } catch (error) {
     // Token invalid or expired
     return null;
