@@ -4,6 +4,7 @@
   "main": "app/main.ts",
   "type": "commonjs",
   "scripts": {
+    "test": "ts-node test.ts",
     "start": "ts-node app/main.ts",
     "dev": "ts-node app/main.ts",
     "build": "tsc"
@@ -13,9 +14,11 @@
     "@prisma/client": "^6.4.1",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.0",
+    "jsonwebtoken": "^9.0.2",
     "prisma": "^6.4.1"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
