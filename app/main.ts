@@ -14,6 +14,8 @@ if (!process.env.DATABASE_URL) {
 }
 
 const fastify = Fastify({ logger: true });
+// To use this hook, add it in your Fastify instance (e.g. in a plugin or route registration)
+// For example, in your auth router:
 
 // Initialize Prisma once at app startup
 const prisma = new PrismaClient();

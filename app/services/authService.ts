@@ -1,6 +1,6 @@
 // language: typescript
 import { PrismaClient } from '@prisma/client';
-import { generateToken } from './jwtService';
+import { generateToken,  verifyToken } from './jwtService';
 import prisma from "./prismaService";
 import bcrypt from 'bcrypt';
 
@@ -13,7 +13,7 @@ export enum Role {
     Helper = 'helper',
     Commercial = 'commercial'
   }
-export const LoginService = {
+export const authService = {
     
     async login(email: string, password: string, role: string): Promise<string | null> {
         let prismaRole;
@@ -48,5 +48,11 @@ export const LoginService = {
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) return null;
         return generateToken({ userId: String(user.id), role: 'user' });
+      },
+
+    async verifyToken(token: string): Promise<{ userId: string; role: string } | null> {
+        const decodedToken = await verifyToken(token);
+        if (!decodedToken) return null;
+        return decodedToken;
       }
 };

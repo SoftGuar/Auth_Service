@@ -1,24 +1,46 @@
-import { generateToken, verifyToken } from './app/services/jwtService';
+// language: typescript
+import { generateToken, verifyToken, TokenPayload } from './app/services/jwtService';
+import { connectRedis, setToken, getToken, deleteToken } from './app/services/cacheService';
+import { authService } from './app/services/authService';
 import bcrypt from 'bcrypt';
-import { LoginService } from './app/services/loginService';
 
-
-   let token = generateToken({ userId: '12345', role: 'admin'});
-  console.log(token);
+(async function main() {
+  // Connect to Redis
+  await connectRedis();
   
+  // Generate a JWT token and verify it to get the payload
+  const payload: TokenPayload = { userId: 'test-user', role: 'admin' };
+  const token = generateToken(payload);
+  console.log('Generated Token:', token);
+  
+  // Directly parse the token using our jwtService
   const decoded = verifyToken(token);
-  console.log(decoded);
-
-
+  if (!decoded) {
+    console.error('Token is null');
+    return;
+  }
+  console.log('Decoded Token:', decoded);
+  
+  // Store the decoded token payload in Redis for caching purposes
+  const cacheKey = `token:${token}`;
+  await setToken(cacheKey, JSON.stringify(decoded), 60); // cache expires in 60 seconds
+  
+  // Retrieve the cached token payload from Redis
+  const cached = await getToken(cacheKey);
+  if (cached) {
+    console.log('Cached Token Payload:', JSON.parse(cached));
+  } else {
+    console.error('No cached token payload found');
+  }
+  
+  // Clean up - delete the cached token for repeated runs
+  await deleteToken(cacheKey);
+  
+  // Optional: Use the authService.verifyToken which caches the result internally
+  const verified = await authService.verifyToken(token);
+  console.log('Verified Token via authService:', verified);
+  
+  // Demonstrate bcrypt (just for illustration)
   const hashedPassword = bcrypt.hashSync('password', 10);
-  console.log(hashedPassword);
-
-  (async function main() {
-    let token2 = await LoginService.login('example@gmail.com', 'password', "admin");
-    console.log(token2);
-    if (token2) {
-      console.log(verifyToken(token2));
-    } else {
-      console.error('Token is null');
-    }
-  })();
+  console.log('Hashed Password:', hashedPassword);
+})();

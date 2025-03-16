@@ -9,4 +9,15 @@ services:
       - "3000:3000"
     env_file:
       - .env
-      - example-env
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:
