@@ -47,7 +47,7 @@ export const authService = {
         if (!user) return null;
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) return null;
-        return generateToken({ userId: String(user.id), role: 'user' });
+        return generateToken({ userId: String(user.id), role: role });
       },
 
     async verifyToken(token: string): Promise<{ userId: string; role: string } | null> {
