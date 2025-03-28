@@ -30,7 +30,7 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh telebit-server << 'EOF'
-            cd Aurh_Service/  # Change to your app directory
+            cd Auth_Service/  # Change to your app directory
             git pull origin main  # Pull latest changes
             npm install  # Install dependencies
             npx prisma generate --schema="app/prisma/schema.prisma"
