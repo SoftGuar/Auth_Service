@@ -1,4 +1,5 @@
 import { Type } from '@sinclair/typebox';
+import { CommonErrorResponses } from '../baseSchema';
 
 export const loginSchema = {
   body: Type.Object({
@@ -13,10 +14,7 @@ export const loginSchema = {
         token: Type.String()
       })
     }),
-    401: Type.Object({
-      success: Type.Literal(false),
-      message: Type.String()
-    })
+    ...CommonErrorResponses,
   }
 };
 
@@ -32,13 +30,6 @@ export const verifyTokenSchema = {
         role: Type.String()
       })
     }),
-    400: Type.Object({
-      success: Type.Literal(false),
-      message: Type.String()
-    }),
-    401: Type.Object({
-      success: Type.Literal(false),
-      message: Type.String()
-    })
+    ...CommonErrorResponses,
   }
 };

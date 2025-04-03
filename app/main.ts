@@ -5,6 +5,7 @@ import registerRoutes from './routers';
 import { PrismaClient } from '@prisma/client';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import logger from './utils/logger/logger';
 
 const isProd = process.env.ENV ? (process.env.ENV === 'PROD') : false;
 
@@ -81,6 +82,7 @@ async function startServer() {
     const port = Number(process.env.PORT) || 3000;
     const host = process.env.HOST || '0.0.0.0';
     await fastify.listen({ port, host });
+    logger.info(`Server listening on ${host}:${port}`);
     fastify.log.info(`Server started on port ${port}`);
   } catch (err) {
     fastify.log.error(err);
@@ -90,6 +92,7 @@ async function startServer() {
 
 // Add graceful shutdown
 const gracefulShutdown = async () => {
+  logger.info('Received shutdown signal');
   console.log('Shutting down gracefully');
   await prisma.$disconnect();
   process.exit(0);
