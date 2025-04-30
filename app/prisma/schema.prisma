@@ -8,21 +8,25 @@ datasource db {
 }
 
 model Decider {
-  id         Int     @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   first_name String
   last_name  String
-  email      String  @unique
+  email      String   @unique
   password   String
   phone      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 }
 
 model SuperAdmin {
-  id         Int     @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   first_name String
   last_name  String
-  email      String  @unique
+  email      String   @unique
   password   String
   phone      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
   admins     Admin[]
 }
 
@@ -35,39 +39,52 @@ model Admin {
   phone      String?
   add_by     Int
   privilege  Int
+  created_at DateTime   @default(now())
+  updated_at DateTime   @default(now())
   superAdmin SuperAdmin @relation(fields: [add_by], references: [id], onDelete: Cascade)
 }
 
 model Maintainer {
-  id         Int     @id @default(autoincrement())
-  first_name String
-  last_name  String
-  email      String  @unique
-  password   String
-  phone      String?
+  id           Int            @id @default(autoincrement())
+  first_name   String
+  last_name    String
+  email        String         @unique
+  password     String
+  phone        String?
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @default(now())
+  DispoIssue   DispoIssue[]
+  Intervention Intervention[]
 }
 
 model User {
-  id          Int           @id @default(autoincrement())
-  email       String        @unique
-  first_name  String
-  last_name   String
-  password    String
-  phone       String?
-  Dispositive Dispositive[]
-  Quotation   Quotation[]
-  Transaction Transaction[]
-  helpers     Helper[]      @relation("UserHelpers")
+  id                   Int                    @id @default(autoincrement())
+  email                String                 @unique
+  first_name           String
+  last_name            String
+  password             String
+  phone                String?
+  created_at           DateTime               @default(now())
+  MAC                  String
+  updated_at           DateTime               @default(now())
+  Dispositive          Dispositive[]
+  Environment          Environment[]
+  HelperRecommendation HelperRecommendation[]
+  Quotation            Quotation[]
+  Transaction          Transaction[]
+  helpers              Helper[]               @relation("UserHelpers")
 }
 
 model Helper {
-  id         Int     @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   first_name String
   last_name  String
-  email      String  @unique
+  email      String   @unique
   password   String
   phone      String?
-  users      User[]  @relation("UserHelpers")
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  users      User[]   @relation("UserHelpers")
 }
 
 model Commercial {
@@ -77,6 +94,8 @@ model Commercial {
   email       String        @unique
   password    String
   phone       String?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now())
   Transaction Transaction[]
 }
 
@@ -90,8 +109,12 @@ model Dispositive {
   state              String
   user_id            Int?
   product_id         Int
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @default(now())
+  DispoIssue         DispoIssue[]
   Product            Product              @relation(fields: [product_id], references: [id], onDelete: Cascade)
   User               User?                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Intervention       Intervention[]
   ProductTransaction ProductTransaction[]
 }
 
@@ -100,6 +123,8 @@ model Product {
   name             String
   description      String?
   price            Float
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @default(now())
   Dispositive      Dispositive[]
   ProductQuotation ProductQuotation[]
 }
@@ -108,6 +133,8 @@ model ProductQuotation {
   quotation_id Int
   product_id   Int
   count        Int
+  created_at   DateTime  @default(now())
+  updated_at   DateTime
   Product      Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
   Quotation    Quotation @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
 
@@ -115,18 +142,22 @@ model ProductQuotation {
 }
 
 model ProductTransaction {
-  id             Int         @id @default(autoincrement())
   transaction_id Int
   dispositive_id Int
   isConfirmed    Boolean     @default(false)
+  created_at     DateTime    @default(now())
+  updated_at     DateTime
   Dispositive    Dispositive @relation(fields: [dispositive_id], references: [id])
-  Transaction    Transaction @relation(fields: [transaction_id], references: [id])
+  Transaction    Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
+
+  @@id([transaction_id, dispositive_id])
 }
 
 model Quotation {
   id               Int                @id @default(autoincrement())
   user_id          Int
-  date             DateTime
+  created_at       DateTime           @default(now())
+  updated_at       DateTime
   ProductQuotation ProductQuotation[]
   User             User               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
@@ -135,9 +166,226 @@ model Transaction {
   id                 Int                  @id @default(autoincrement())
   user_id            Int
   commercial_id      Int
-  processed          Boolean              @default(false)
-  date               DateTime
+  created_at         DateTime             @default(now())
+  updated_at         DateTime
   ProductTransaction ProductTransaction[]
   Commercial         Commercial           @relation(fields: [commercial_id], references: [id], onDelete: Cascade)
   User               User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Assistance {
+  id         Int      @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String   @unique
+  password   String
+  phone      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model CircularLimits {
+  id            Int   @id @default(autoincrement())
+  centerPointId Int
+  radius        Float
+  zoneId        Int   @unique
+  Point         Point @relation(fields: [centerPointId], references: [id])
+  Zone          Zone  @relation(fields: [zoneId], references: [id])
+}
+
+model DispoIssue {
+  id            Int         @id @default(autoincrement())
+  dispositiveId Int
+  description   String
+  status        String      @default("pending")
+  maintainerId  Int?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now())
+  Dispositive   Dispositive @relation(fields: [dispositiveId], references: [id])
+  Maintainer    Maintainer? @relation(fields: [maintainerId], references: [id])
+}
+
+model ElementsLimits {
+  id                                 Int                                  @id @default(autoincrement())
+  limits_id                          Int                                  @unique
+  Zone                               Zone                                 @relation(fields: [limits_id], references: [id])
+  ElementsLimitsToEnvironmentElement ElementsLimitsToEnvironmentElement[]
+}
+
+model ElementsLimitsToEnvironmentElement {
+  id                 Int                @id @default(autoincrement())
+  elementsLimitsId   Int
+  environmentId      Int
+  objectId           Int
+  ElementsLimits     ElementsLimits     @relation(fields: [elementsLimitsId], references: [id])
+  EnvironmentElement EnvironmentElement @relation(fields: [environmentId, objectId], references: [environmentId, objectId])
+
+  @@unique([elementsLimitsId, environmentId, objectId])
+}
+
+model Environment {
+  id                 Int                  @id @default(autoincrement())
+  userId             Int
+  User               User                 @relation(fields: [userId], references: [id])
+  EnvironmentElement EnvironmentElement[]
+  Zone               Zone[]
+}
+
+model EnvironmentElement {
+  environmentId                      Int
+  objectId                           Int
+  ElementsLimitsToEnvironmentElement ElementsLimitsToEnvironmentElement[]
+  Environment                        Environment                          @relation(fields: [environmentId], references: [id])
+  Object                             Object                               @relation(fields: [objectId], references: [id])
+
+  @@id([environmentId, objectId])
+}
+
+model HelperRecommendation {
+  id         Int      @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String
+  phone      String?
+  status     String   @default("pending")
+  user_id    Int
+  notes      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  User       User     @relation(fields: [user_id], references: [id])
+}
+
+model Intervention {
+  idMaintainer       Int
+  description        String
+  type               String
+  end_date           DateTime
+  start_date         DateTime            @default(now())
+  id                 Int                 @id @default(autoincrement())
+  status             InterventionStatus  @default(pending)
+  idDispositive      Int
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @default(now())
+  Dispositive        Dispositive         @relation(fields: [idDispositive], references: [id])
+  Maintainer         Maintainer          @relation(fields: [idMaintainer], references: [id])
+  InterventionReport InterventionReport?
+}
+
+model InterventionReport {
+  id             Int          @id @default(autoincrement())
+  interventionId Int          @unique
+  title          String
+  description    String
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @default(now())
+  Intervention   Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  type       String?
+  title      String
+  message    String
+  metadata   Json?
+  is_read    Boolean   @default(false)
+  created_at DateTime  @default(now())
+  sent_at    DateTime?
+  read_at    DateTime?
+  user_type  UserType  @default(USER)
+}
+
+model Object {
+  id                 Int                  @id @default(autoincrement())
+  EnvironmentElement EnvironmentElement[]
+}
+
+model POI {
+  id            Int         @id @default(autoincrement())
+  coordinates   String
+  poiCategoryId Int
+  name          String
+  description   String
+  POICategory   POICategory @relation(fields: [poiCategoryId], references: [id])
+  Zone          Zone[]
+}
+
+model POICategory {
+  id   Int    @id @default(autoincrement())
+  name String
+  POI  POI[]
+}
+
+model Point {
+  id             Int              @id @default(autoincrement())
+  x              Float
+  y              Float
+  CircularLimits CircularLimits[]
+  PolygonLimits  PolygonLimits[]
+  PointsLimits   PointsLimits[]
+}
+
+model PointsLimits {
+  id        Int     @id @default(autoincrement())
+  limits_id Int     @unique
+  Zone      Zone    @relation(fields: [limits_id], references: [id])
+  Point     Point[]
+}
+
+model PolygonLimits {
+  id            Int   @id @default(autoincrement())
+  centerPointId Int
+  radius        Float
+  facesNb       Int
+  rotation      Float
+  limits_id     Int   @unique
+  Point         Point @relation(fields: [centerPointId], references: [id])
+  Zone          Zone  @relation(fields: [limits_id], references: [id])
+}
+
+model Zone {
+  id             Int             @id @default(autoincrement())
+  environmentId  Int
+  zoneType       ZoneType
+  limitsType     LimitsType
+  color          String
+  icon           String
+  CircularLimits CircularLimits?
+  ElementsLimits ElementsLimits?
+  PointsLimits   PointsLimits?
+  PolygonLimits  PolygonLimits?
+  Environment    Environment     @relation(fields: [environmentId], references: [id])
+  POI            POI[]
+}
+
+enum InterventionStatus {
+  done
+  inProgress
+  pending
+  rescheduled
+}
+
+enum LimitsType {
+  CIRCULAR
+  POLYGON
+  POINTS
+  ELEMENTS
+}
+
+enum UserType {
+  USER
+  COMMERCIAL
+  ADMIN
+  SUPERADMIN
+  MAINTAINER
+  DECIDER
+  HELPER
+}
+
+enum ZoneType {
+  CIRCULATION
+  WORK
+  SERVICE
+  FORBIDDEN
+  DANGER
 }
