@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import logger from './utils/logger/logger';
+import { writeReport } from './utils/executive_report';
 
 const isProd = process.env.ENV ? (process.env.ENV === 'PROD') : false;
 
@@ -84,6 +85,7 @@ async function startServer() {
     await fastify.listen({ port, host });
     logger.info(`Server listening on ${host}:${port}`);
     fastify.log.info(`Server started on port ${port}`);
+    setInterval(writeReport, 2 * 60 * 60 * 1000); // Write report every 2 hours
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
