@@ -28,7 +28,9 @@ cp .env.example .env
 
 # Running the App
 
-.\start.bat (or sh) to start services
+```sh
+npm run dev
+```
 
 # Run Tests 
 Execute the test suite using Jest:
